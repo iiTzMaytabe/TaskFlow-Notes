@@ -1,0 +1,5 @@
+{
+  "name": "TaskFlow & Notes",
+  "description": "A streamlined productivity application featuring a robust To-Do list with categorized tasks and a comprehensive Note-taking system. Includes Dark Mode, Local Storage persistence, and Gemini AI-powered assistance for task generation and note refinement.",
+  "requestFramePermissions": []
+}
