@@ -74,7 +74,7 @@ const Layout: React.FC<LayoutProps> = ({
       </main>
       
       <footer className="py-6 text-center text-sm text-gray-400 dark:text-gray-600">
-        <p>© {new Date().getFullYear()} TaskFlow & Notes. Auto-save enabled.</p>
+        <p>© {new Date().getFullYear()} TaskFlow Created by Maytabe</p>
       </footer>
     </div>
   );

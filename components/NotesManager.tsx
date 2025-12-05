@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Note } from '../types';
-import { Plus, Trash2, Calendar, Sparkles, Loader2, Save, Book } from 'lucide-react';
-import { enhanceNote } from '../services/geminiService';
+import { Plus, Trash2, Calendar, Save, Book } from 'lucide-react';
 
 interface NotesManagerProps {
   notes: Note[];
@@ -10,7 +9,6 @@ interface NotesManagerProps {
 
 const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
-  const [isAiLoading, setIsAiLoading] = useState(false);
 
   // Initialize selection
   useEffect(() => {
@@ -50,19 +48,6 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
         : note
     );
     setNotes(updatedNotes);
-  };
-
-  const handleAIEnhance = async () => {
-    if (!activeNote || isAiLoading) return;
-    setIsAiLoading(true);
-    try {
-      const improved = await enhanceNote(activeNote);
-      setNotes(notes.map(n => n.id === activeNote.id ? { ...n, ...improved, updatedAt: Date.now() } : n));
-    } catch (err) {
-      alert("Failed to enhance note. Check API Key configuration.");
-    } finally {
-      setIsAiLoading(false);
-    }
   };
 
   const formatDate = (ts: number) => {
@@ -136,19 +121,6 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
                 Created {formatDate(activeNote.createdAt)}
               </span>
               <div className="flex items-center gap-2">
-                 {isAiLoading ? (
-                   <span className="text-xs text-indigo-500 flex items-center gap-1 animate-pulse">
-                     <Loader2 className="w-3 h-3 animate-spin" /> Optimizing...
-                   </span>
-                 ) : (
-                   <button
-                    onClick={handleAIEnhance}
-                    className="text-xs flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-full transition-colors font-medium"
-                    title="Use AI to fix grammar and format"
-                   >
-                     <Sparkles className="w-3 h-3" /> AI Polish
-                   </button>
-                 )}
                  <span className="text-xs text-green-600 dark:text-green-500 flex items-center gap-1">
                    <Save className="w-3 h-3" /> Saved
                  </span>

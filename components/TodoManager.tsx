@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Category, TodoItem } from '../types';
-import { Plus, Trash2, CheckCircle, Circle, Sparkles, Loader2, Calendar } from 'lucide-react';
-import { suggestTasksForCategory } from '../services/geminiService';
+import { Plus, Trash2, CheckCircle, Circle } from 'lucide-react';
 
 interface TodoManagerProps {
   categories: Category[];
@@ -15,7 +14,6 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
-  const [isAiLoading, setIsAiLoading] = useState(false);
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
 
@@ -92,35 +90,6 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
     setCategories(updatedCategories);
   };
 
-  const handleAiSuggest = async () => {
-    if (!activeCategory || isAiLoading) return;
-    setIsAiLoading(true);
-    try {
-      const suggestions = await suggestTasksForCategory(activeCategory.name);
-      if (suggestions.length > 0) {
-        const newTodos: TodoItem[] = suggestions.map((text) => ({
-          id: crypto.randomUUID(),
-          text,
-          completed: false,
-          createdAt: Date.now(),
-        }));
-        
-        const updatedCategories = categories.map((cat) => {
-          if (cat.id === activeCategoryId) {
-            return { ...cat, todos: [...newTodos, ...cat.todos] };
-          }
-          return cat;
-        });
-        setCategories(updatedCategories);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Could not generate tasks. Please ensure API Key is set.");
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] space-y-6">
       
@@ -195,14 +164,6 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
                   Created {new Date(activeCategory.createdAt).toLocaleDateString()} • {activeCategory.todos.filter(t => t.completed).length}/{activeCategory.todos.length} done
                 </p>
               </div>
-              <button
-                onClick={handleAiSuggest}
-                disabled={isAiLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                <span>AI Suggest Tasks</span>
-              </button>
             </div>
 
             {/* Input */}
@@ -232,7 +193,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
                   <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                     <CheckCircle className="w-8 h-8 opacity-20" />
                   </div>
-                  <p>No tasks yet. Add one or ask AI!</p>
+                  <p>No tasks yet.</p>
                 </div>
               ) : (
                 activeCategory.todos.map((todo) => (
