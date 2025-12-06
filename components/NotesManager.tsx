@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Note } from '../types';
 import { Plus, Trash2, Calendar, Save, Book } from 'lucide-react';
 
@@ -6,6 +6,96 @@ interface NotesManagerProps {
   notes: Note[];
   setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
 }
+
+// --- Swipeable Note Item Component ---
+interface SwipeableNoteItemProps {
+  note: Note;
+  isSelected: boolean;
+  onSelect: () => void;
+  onDelete: () => void;
+  formatDate: (ts: number) => string;
+}
+
+const SwipeableNoteItem: React.FC<SwipeableNoteItemProps> = ({ note, isSelected, onSelect, onDelete, formatDate }) => {
+  const [offsetX, setOffsetX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const startX = useRef<number>(0);
+  const itemRef = useRef<HTMLDivElement>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.targetTouches[0].clientX;
+    setIsSwiping(true);
+    if (itemRef.current) itemRef.current.style.transition = 'none';
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!isSwiping) return;
+    const currentX = e.targetTouches[0].clientX;
+    const diff = currentX - startX.current;
+
+    // Only swipe left
+    if (diff < 0) {
+      setOffsetX(Math.max(diff, -150));
+    }
+  };
+
+  const onTouchEnd = () => {
+    setIsSwiping(false);
+    if (itemRef.current) itemRef.current.style.transition = 'transform 0.3s ease-out';
+
+    if (offsetX < -100) {
+      setOffsetX(-500); // Animate out
+      setTimeout(onDelete, 300);
+    } else {
+      setOffsetX(0);
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden mb-1 rounded-xl select-none touch-pan-y">
+      {/* Background (Delete) */}
+      <div className="absolute inset-0 bg-red-500 flex items-center justify-end pr-4 rounded-xl">
+        <Trash2 className="w-5 h-5 text-white" />
+      </div>
+
+      {/* Content */}
+      <div
+        ref={itemRef}
+        onClick={onSelect}
+        style={{ transform: `translateX(${offsetX}px)` }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        className={`relative group p-3 rounded-xl cursor-pointer bg-white dark:bg-gray-800 transition-all duration-200 border ${
+          isSelected
+            ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700'
+            : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 border-transparent'
+        }`}
+      >
+        <div className="flex justify-between items-start pointer-events-none">
+          <h3 className={`font-medium truncate ${isSelected ? 'text-indigo-900 dark:text-indigo-100' : 'text-gray-800 dark:text-gray-200'}`}>
+            {note.title || 'Untitled Note'}
+          </h3>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600 transition-opacity pointer-events-auto hidden sm:block"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center pointer-events-none">
+           {formatDate(note.updatedAt)}
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1 pointer-events-none">
+          {note.content || 'No additional text'}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
@@ -31,8 +121,7 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
     setSelectedNoteId(newNote.id);
   };
 
-  const handleDeleteNote = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
+  const handleDeleteNote = (id: string) => {
     const updatedNotes = notes.filter((n) => n.id !== id);
     setNotes(updatedNotes);
     if (selectedNoteId === id) {
@@ -79,33 +168,14 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
             </div>
           ) : (
             notes.map((note) => (
-              <div
+              <SwipeableNoteItem
                 key={note.id}
-                onClick={() => setSelectedNoteId(note.id)}
-                className={`group p-3 rounded-xl cursor-pointer transition-all duration-200 border ${
-                  selectedNoteId === note.id
-                    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 border-transparent'
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <h3 className={`font-medium truncate ${selectedNoteId === note.id ? 'text-indigo-900 dark:text-indigo-100' : 'text-gray-800 dark:text-gray-200'}`}>
-                    {note.title || 'Untitled Note'}
-                  </h3>
-                  <button
-                    onClick={(e) => handleDeleteNote(e, note.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600 transition-opacity"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center">
-                   {formatDate(note.updatedAt)}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
-                  {note.content || 'No additional text'}
-                </p>
-              </div>
+                note={note}
+                isSelected={selectedNoteId === note.id}
+                onSelect={() => setSelectedNoteId(note.id)}
+                onDelete={() => handleDeleteNote(note.id)}
+                formatDate={formatDate}
+              />
             ))
           )}
         </div>

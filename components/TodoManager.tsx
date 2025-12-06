@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Category, TodoItem } from '../types';
 import { Plus, Trash2, CheckCircle, Circle } from 'lucide-react';
 
@@ -6,6 +6,109 @@ interface TodoManagerProps {
   categories: Category[];
   setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
 }
+
+// --- Swipeable Item Component ---
+interface SwipeableTodoItemProps {
+  todo: TodoItem;
+  toggleTask: (id: string) => void;
+  deleteTask: (id: string) => void;
+}
+
+const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask, deleteTask }) => {
+  const [offsetX, setOffsetX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const startX = useRef<number>(0);
+  const itemRef = useRef<HTMLDivElement>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.targetTouches[0].clientX;
+    setIsSwiping(true);
+    // Disable transition during drag for immediate feedback
+    if (itemRef.current) itemRef.current.style.transition = 'none';
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!isSwiping) return;
+    const currentX = e.targetTouches[0].clientX;
+    const diff = currentX - startX.current;
+
+    // Only allow swiping left (negative diff)
+    if (diff < 0) {
+      // Limit swipe distance visually
+      setOffsetX(Math.max(diff, -150));
+    }
+  };
+
+  const onTouchEnd = () => {
+    setIsSwiping(false);
+    if (itemRef.current) itemRef.current.style.transition = 'transform 0.3s ease-out';
+
+    // Threshold to trigger delete
+    if (offsetX < -100) {
+      // Slide completely off screen then delete
+      setOffsetX(-500); // Visual slide out
+      setTimeout(() => deleteTask(todo.id), 300);
+    } else {
+      // Snap back
+      setOffsetX(0);
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-xl mb-2 select-none touch-pan-y">
+      {/* Background (Trash Layer) */}
+      <div className="absolute inset-0 bg-red-500 flex items-center justify-end pr-6 rounded-xl">
+        <Trash2 className="w-6 h-6 text-white" />
+      </div>
+
+      {/* Foreground (Content Layer) */}
+      <div
+        ref={itemRef}
+        style={{ transform: `translateX(${offsetX}px)` }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        className={`relative group flex items-center gap-3 p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl transition-shadow ${
+          todo.completed ? 'opacity-60 bg-gray-50 dark:bg-gray-800/50' : 'hover:shadow-md'
+        }`}
+      >
+        <button
+          onClick={() => toggleTask(todo.id)}
+          className={`flex-shrink-0 transition-colors z-10 ${
+            todo.completed ? 'text-green-500' : 'text-gray-300 hover:text-indigo-500'
+          }`}
+        >
+          {todo.completed ? (
+            <CheckCircle className="w-6 h-6" />
+          ) : (
+            <Circle className="w-6 h-6" />
+          )}
+        </button>
+        
+        <span className={`flex-1 text-lg transition-all pointer-events-none ${
+          todo.completed ? 'line-through text-gray-400' : 'text-gray-800 dark:text-gray-200'
+        }`}>
+          {todo.text}
+        </span>
+        
+        <span className="text-xs text-gray-300 hidden sm:block pointer-events-none">
+          {new Date(todo.createdAt).toLocaleDateString()}
+        </span>
+
+        {/* Desktop Delete Button (Hidden on Touch if swiping logic handles it, but good to keep for mouse users) */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            deleteTask(todo.id);
+          }}
+          className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all hidden sm:block"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) => {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(
@@ -187,7 +290,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
             </form>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto p-2 space-y-2">
+            <div className="flex-1 overflow-y-auto p-2">
               {activeCategory.todos.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-gray-400 space-y-4">
                   <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
@@ -197,44 +300,12 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
                 </div>
               ) : (
                 activeCategory.todos.map((todo) => (
-                  <div
+                  <SwipeableTodoItem
                     key={todo.id}
-                    className={`group flex items-center gap-3 p-4 rounded-xl transition-all duration-200 ${
-                      todo.completed 
-                        ? 'bg-gray-50 dark:bg-gray-800/50 opacity-60' 
-                        : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-100 dark:border-gray-700'
-                    }`}
-                  >
-                    <button
-                      onClick={() => toggleTask(todo.id)}
-                      className={`flex-shrink-0 transition-colors ${
-                        todo.completed ? 'text-green-500' : 'text-gray-300 hover:text-indigo-500'
-                      }`}
-                    >
-                      {todo.completed ? (
-                        <CheckCircle className="w-6 h-6" />
-                      ) : (
-                        <Circle className="w-6 h-6" />
-                      )}
-                    </button>
-                    
-                    <span className={`flex-1 text-lg transition-all ${
-                      todo.completed ? 'line-through text-gray-400' : 'text-gray-800 dark:text-gray-200'
-                    }`}>
-                      {todo.text}
-                    </span>
-                    
-                    <span className="text-xs text-gray-300 hidden sm:block">
-                      {new Date(todo.createdAt).toLocaleDateString()}
-                    </span>
-
-                    <button
-                      onClick={() => deleteTask(todo.id)}
-                      className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
+                    todo={todo}
+                    toggleTask={toggleTask}
+                    deleteTask={deleteTask}
+                  />
                 ))
               )}
             </div>
