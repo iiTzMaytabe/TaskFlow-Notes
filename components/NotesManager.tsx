@@ -66,14 +66,14 @@ const SwipeableNoteItem: React.FC<SwipeableNoteItemProps> = ({ note, isSelected,
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        className={`relative group p-3 rounded-xl cursor-pointer bg-white dark:bg-gray-800 transition-all duration-200 border ${
+        className={`relative group p-3 rounded-xl cursor-pointer bg-white dark:bg-deep transition-all duration-200 border ${
           isSelected
-            ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700'
-            : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 border-transparent'
+            ? 'bg-sage/20 dark:bg-forest border-teal'
+            : 'hover:bg-mint/50 dark:hover:bg-forest/50 border-transparent'
         }`}
       >
         <div className="flex justify-between items-start pointer-events-none">
-          <h3 className={`font-medium truncate ${isSelected ? 'text-indigo-900 dark:text-indigo-100' : 'text-gray-800 dark:text-gray-200'}`}>
+          <h3 className={`font-medium truncate ${isSelected ? 'text-teal dark:text-mint' : 'text-midnight dark:text-gray-200'}`}>
             {note.title || 'Untitled Note'}
           </h3>
           <button
@@ -86,10 +86,10 @@ const SwipeableNoteItem: React.FC<SwipeableNoteItemProps> = ({ note, isSelected,
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center pointer-events-none">
+        <p className="text-xs text-sage dark:text-sage mt-1 flex items-center pointer-events-none">
            {formatDate(note.updatedAt)}
         </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1 pointer-events-none">
+        <p className="text-sm text-forest/70 dark:text-gray-400 line-clamp-2 mt-1 pointer-events-none">
           {note.content || 'No additional text'}
         </p>
       </div>
@@ -149,21 +149,21 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-12rem)] bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-12rem)] bg-white dark:bg-deep rounded-2xl shadow-xl border border-sage/30 dark:border-forest overflow-hidden">
       {/* Sidebar List */}
-      <div className="w-full md:w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
-          <h2 className="font-semibold text-gray-700 dark:text-gray-200">All Notes</h2>
+      <div className="w-full md:w-1/3 border-r border-sage/30 dark:border-forest flex flex-col">
+        <div className="p-4 border-b border-sage/30 dark:border-forest flex justify-between items-center bg-mint/30 dark:bg-forest/30">
+          <h2 className="font-semibold text-deep dark:text-mint">All Notes</h2>
           <button
             onClick={handleCreateNote}
-            className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm active:scale-95"
+            className="p-2 bg-teal text-mint rounded-lg hover:bg-forest transition-colors shadow-sm active:scale-95"
           >
             <Plus className="w-5 h-5" />
           </button>
         </div>
-        <div className="overflow-y-auto flex-1 p-2 space-y-1">
+        <div className="overflow-y-auto flex-1 p-2 space-y-1 bg-white/50 dark:bg-deep">
           {notes.length === 0 ? (
-            <div className="text-center py-10 text-gray-400 text-sm">
+            <div className="text-center py-10 text-sage text-sm">
               No notes yet. <br /> Click + to create one.
             </div>
           ) : (
@@ -182,16 +182,16 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
       </div>
 
       {/* Editor Area */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-gray-800">
+      <div className="flex-1 flex flex-col bg-white dark:bg-deep">
         {activeNote ? (
           <>
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <span className="text-xs text-gray-400 flex items-center gap-1">
+            <div className="p-4 border-b border-sage/30 dark:border-forest flex justify-between items-center">
+              <span className="text-xs text-sage flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Created {formatDate(activeNote.createdAt)}
               </span>
               <div className="flex items-center gap-2">
-                 <span className="text-xs text-green-600 dark:text-green-500 flex items-center gap-1">
+                 <span className="text-xs text-teal dark:text-sage flex items-center gap-1">
                    <Save className="w-3 h-3" /> Saved
                  </span>
               </div>
@@ -202,18 +202,18 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
                 value={activeNote.title}
                 onChange={(e) => handleUpdateNote('title', e.target.value)}
                 placeholder="Note Title"
-                className="text-3xl font-bold bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 mb-4"
+                className="text-3xl font-bold bg-transparent border-none outline-none text-midnight dark:text-mint placeholder-sage/50 mb-4"
               />
               <textarea
                 value={activeNote.content}
                 onChange={(e) => handleUpdateNote('content', e.target.value)}
                 placeholder="Start typing your note here..."
-                className="flex-1 w-full resize-none bg-transparent border-none outline-none text-gray-700 dark:text-gray-300 leading-relaxed text-lg"
+                className="flex-1 w-full resize-none bg-transparent border-none outline-none text-forest dark:text-gray-300 leading-relaxed text-lg placeholder-sage/40"
               />
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+          <div className="flex-1 flex flex-col items-center justify-center text-sage">
             <Book className="w-16 h-16 mb-4 opacity-20" />
             <p>Select a note or create a new one.</p>
           </div>

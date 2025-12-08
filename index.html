@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#4f46e5" />
+    <meta name="theme-color" content="#235347" />
     <meta name="description" content="A streamlined productivity application featuring a robust To-Do list and Notes system." />
     
     <title>TaskFlow & Notes</title>
@@ -20,10 +20,13 @@
         theme: {
           extend: {
             colors: {
-              background: 'var(--background)',
-              foreground: 'var(--foreground)',
-              primary: '#3b82f6',
-              secondary: '#64748b',
+              // Custom Palette
+              midnight: '#051F20',
+              deep: '#0B2B26',
+              forest: '#163832',
+              teal: '#235347',
+              sage: '#8EB69B',
+              mint: '#DAF1DE',
             }
           }
         }
@@ -58,7 +61,7 @@
 }
 </script>
 </head>
-  <body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <body class="bg-mint text-midnight dark:bg-midnight dark:text-mint transition-colors duration-300">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
     

@@ -18,27 +18,27 @@ const Layout: React.FC<LayoutProps> = ({
   toggleTheme 
 }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-mint dark:bg-midnight transition-colors duration-300">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <header className="sticky top-0 z-10 bg-white/60 dark:bg-deep/80 backdrop-blur-md border-b border-sage/30 dark:border-forest shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="bg-indigo-600 p-2 rounded-lg">
-              <ClipboardList className="w-6 h-6 text-white" />
+          <div className="flex items-center space-x-2 group cursor-default">
+            <div className="bg-teal p-2 rounded-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm">
+              <ClipboardList className="w-6 h-6 text-mint" />
             </div>
-            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 hidden sm:block">
+            <h1 className="text-xl font-bold text-midnight dark:text-mint hidden sm:block tracking-tight">
               TaskFlow & Notes
             </h1>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 space-x-1">
+          <div className="flex bg-sage/20 dark:bg-forest rounded-lg p-1 space-x-1">
             <button
               onClick={() => onSwitchView('todos')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform ${
                 activeView === 'todos'
-                  ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                  ? 'bg-teal text-mint shadow-md scale-100'
+                  : 'text-forest dark:text-sage hover:text-teal dark:hover:text-mint hover:bg-white/50 dark:hover:bg-deep/50 hover:scale-105 active:scale-95'
               }`}
             >
               <ClipboardList className="w-4 h-4" />
@@ -46,10 +46,10 @@ const Layout: React.FC<LayoutProps> = ({
             </button>
             <button
               onClick={() => onSwitchView('notes')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform ${
                 activeView === 'notes'
-                  ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                  ? 'bg-teal text-mint shadow-md scale-100'
+                  : 'text-forest dark:text-sage hover:text-teal dark:hover:text-mint hover:bg-white/50 dark:hover:bg-deep/50 hover:scale-105 active:scale-95'
               }`}
             >
               <Book className="w-4 h-4" />
@@ -60,7 +60,7 @@ const Layout: React.FC<LayoutProps> = ({
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-500 dark:text-gray-400"
+            className="p-2 rounded-full hover:bg-sage/20 dark:hover:bg-forest transition-all duration-300 text-teal dark:text-sage hover:scale-110 hover:rotate-12 active:scale-90"
             aria-label="Toggle Dark Mode"
           >
             {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -69,11 +69,11 @@ const Layout: React.FC<LayoutProps> = ({
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+      <main className="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
         {children}
       </main>
       
-      <footer className="py-6 text-center text-sm text-gray-400 dark:text-gray-600">
+      <footer className="py-6 text-center text-sm text-forest dark:text-sage opacity-70">
         <p>© {new Date().getFullYear()} TaskFlow Created by Maytabe</p>
       </footer>
     </div>

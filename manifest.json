@@ -3,8 +3,8 @@
   "short_name": "TaskFlow",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
+  "background_color": "#051F20",
+  "theme_color": "#235347",
   "orientation": "portrait-primary",
   "icons": [
     {

@@ -29,7 +29,7 @@ const App: React.FC = () => {
         setNotes([{
           id: 'welcome-note',
           title: 'Welcome to Notes',
-          content: 'This is your new notebook. You can write anything here. Try the AI Polish button to fix grammar!',
+          content: 'This is your new notebook. You can write anything here.',
           createdAt: Date.now(),
           updatedAt: Date.now()
         }]);
@@ -43,7 +43,7 @@ const App: React.FC = () => {
           name: 'My Tasks',
           createdAt: Date.now(),
           todos: [
-            { id: 't1', text: 'Explore the app', completed: false, createdAt: Date.now() },
+            { id: 't1', text: 'Explore the new theme', completed: false, createdAt: Date.now() },
             { id: 't2', text: 'Try Dark Mode', completed: true, createdAt: Date.now() }
           ]
         }]);
@@ -84,8 +84,8 @@ const App: React.FC = () => {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-mint dark:bg-midnight">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal"></div>
       </div>
     );
   }
