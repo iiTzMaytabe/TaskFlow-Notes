@@ -4,6 +4,7 @@ export interface Note {
   content: string;
   createdAt: number;
   updatedAt: number;
+  isDeleted?: boolean;
 }
 
 export interface TodoItem {
@@ -11,6 +12,7 @@ export interface TodoItem {
   text: string;
   completed: boolean;
   createdAt: number;
+  reminder?: number;
 }
 
 export interface Category {
@@ -20,7 +22,12 @@ export interface Category {
   createdAt: number;
 }
 
-export type ViewMode = 'todos' | 'notes';
+export interface DeletedTodoItem extends TodoItem {
+  originalCategoryId: string;
+  deletedAt: number;
+}
+
+export type ViewMode = 'todos' | 'notes' | 'trash';
 
 export interface AIState {
   isLoading: boolean;

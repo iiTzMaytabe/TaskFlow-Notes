@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { ViewMode } from '../types';
-import { Moon, Sun, ClipboardList, Book } from 'lucide-react';
+import { Moon, Sun, ClipboardList, Book, Trash2 } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -32,28 +32,39 @@ const Layout: React.FC<LayoutProps> = ({
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex bg-sage/20 dark:bg-forest rounded-lg p-1 space-x-1">
+          <div className="flex bg-sage/20 dark:bg-forest rounded-lg p-1 space-x-1 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => onSwitchView('todos')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform ${
+              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform whitespace-nowrap ${
                 activeView === 'todos'
                   ? 'bg-teal text-mint shadow-md scale-100'
                   : 'text-forest dark:text-sage hover:text-teal dark:hover:text-mint hover:bg-white/50 dark:hover:bg-deep/50 hover:scale-105 active:scale-95'
               }`}
             >
               <ClipboardList className="w-4 h-4" />
-              <span>My To-Do List</span>
+              <span>To-Do List</span>
             </button>
             <button
               onClick={() => onSwitchView('notes')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform ${
+              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform whitespace-nowrap ${
                 activeView === 'notes'
                   ? 'bg-teal text-mint shadow-md scale-100'
                   : 'text-forest dark:text-sage hover:text-teal dark:hover:text-mint hover:bg-white/50 dark:hover:bg-deep/50 hover:scale-105 active:scale-95'
               }`}
             >
               <Book className="w-4 h-4" />
-              <span>My Notes</span>
+              <span>Notes</span>
+            </button>
+            <button
+              onClick={() => onSwitchView('trash')}
+              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform whitespace-nowrap ${
+                activeView === 'trash'
+                  ? 'bg-red-500/90 text-white shadow-md scale-100'
+                  : 'text-forest dark:text-sage hover:text-red-500 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-deep/50 hover:scale-105 active:scale-95'
+              }`}
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Trash</span>
             </button>
           </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Note } from '../types';
-import { Plus, Trash2, Calendar, Save, Book } from 'lucide-react';
+import { Plus, Trash2, Calendar, Save, Book, FileText } from 'lucide-react';
 
 interface NotesManagerProps {
   notes: Note[];
@@ -73,23 +73,26 @@ const SwipeableNoteItem: React.FC<SwipeableNoteItemProps> = ({ note, isSelected,
         }`}
       >
         <div className="flex justify-between items-start pointer-events-none">
-          <h3 className={`font-medium truncate ${isSelected ? 'text-teal dark:text-mint' : 'text-midnight dark:text-gray-200'}`}>
-            {note.title || 'Untitled Note'}
-          </h3>
+          <div className="flex items-center gap-2 overflow-hidden">
+             <FileText className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-teal' : 'text-sage'}`} />
+             <h3 className={`font-medium truncate ${isSelected ? 'text-teal dark:text-mint' : 'text-midnight dark:text-gray-200'}`}>
+               {note.title || 'Untitled Note'}
+             </h3>
+          </div>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
             }}
-            className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600 transition-opacity pointer-events-auto hidden sm:block"
+            className="opacity-0 group-hover:opacity-100 p-1 text-sage hover:text-red-500 transition-opacity pointer-events-auto hidden sm:block"
           >
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-xs text-sage dark:text-sage mt-1 flex items-center pointer-events-none">
+        <p className="text-xs text-sage dark:text-sage mt-1 flex items-center pointer-events-none pl-6">
            {formatDate(note.updatedAt)}
         </p>
-        <p className="text-sm text-forest/70 dark:text-gray-400 line-clamp-2 mt-1 pointer-events-none">
+        <p className="text-sm text-forest/70 dark:text-gray-400 line-clamp-2 mt-1 pointer-events-none pl-6">
           {note.content || 'No additional text'}
         </p>
       </div>
@@ -100,14 +103,17 @@ const SwipeableNoteItem: React.FC<SwipeableNoteItemProps> = ({ note, isSelected,
 const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
+  // Filter out deleted notes for main view
+  const visibleNotes = notes.filter(n => !n.isDeleted);
+
   // Initialize selection
   useEffect(() => {
-    if (notes.length > 0 && !selectedNoteId) {
-      setSelectedNoteId(notes[0].id);
+    if (visibleNotes.length > 0 && (!selectedNoteId || !visibleNotes.find(n => n.id === selectedNoteId))) {
+      setSelectedNoteId(visibleNotes[0].id);
     }
-  }, [notes, selectedNoteId]);
+  }, [visibleNotes, selectedNoteId]);
 
-  const activeNote = notes.find((n) => n.id === selectedNoteId);
+  const activeNote = visibleNotes.find((n) => n.id === selectedNoteId);
 
   const handleCreateNote = () => {
     const newNote: Note = {
@@ -116,16 +122,22 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
       content: '',
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      isDeleted: false,
     };
     setNotes([newNote, ...notes]);
     setSelectedNoteId(newNote.id);
   };
 
   const handleDeleteNote = (id: string) => {
-    const updatedNotes = notes.filter((n) => n.id !== id);
+    // Soft delete: set isDeleted to true
+    const updatedNotes = notes.map((n) => 
+      n.id === id ? { ...n, isDeleted: true, updatedAt: Date.now() } : n
+    );
     setNotes(updatedNotes);
+    
+    const remaining = updatedNotes.filter(n => !n.isDeleted);
     if (selectedNoteId === id) {
-      setSelectedNoteId(updatedNotes.length > 0 ? updatedNotes[0].id : null);
+      setSelectedNoteId(remaining.length > 0 ? remaining[0].id : null);
     }
   };
 
@@ -162,12 +174,12 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
           </button>
         </div>
         <div className="overflow-y-auto flex-1 p-2 space-y-1 bg-white/50 dark:bg-deep">
-          {notes.length === 0 ? (
+          {visibleNotes.length === 0 ? (
             <div className="text-center py-10 text-sage text-sm">
               No notes yet. <br /> Click + to create one.
             </div>
           ) : (
-            notes.map((note) => (
+            visibleNotes.map((note) => (
               <SwipeableNoteItem
                 key={note.id}
                 note={note}

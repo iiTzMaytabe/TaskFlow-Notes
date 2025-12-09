@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Category, TodoItem } from '../types';
-import { Plus, Trash2, CheckCircle, Circle, Check } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Check, Calendar, Clock, Bell } from 'lucide-react';
 
 interface TodoManagerProps {
   categories: Category[];
   setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+  onDeleteTask: (task: TodoItem, categoryId: string) => void;
 }
 
 // --- Swipeable Item Component ---
@@ -33,8 +34,6 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
     const diff = currentX - startX.current;
 
     // Limit swipe distance visually
-    // Right swipe (positive) -> Complete
-    // Left swipe (negative) -> Delete
     if (diff > 0) {
         setOffsetX(Math.min(diff, 150));
     } else {
@@ -53,14 +52,24 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
       setTimeout(() => deleteTask(todo.id), 300);
     } else if (offsetX > 100) {
       // Right Swipe: Toggle Complete
-      // Snap back to center after toggling
       toggleTask(todo.id);
       setOffsetX(0);
     } else {
-      // Snap back to center
       setOffsetX(0);
     }
   };
+
+  const formatReminder = (ts: number) => {
+    const date = new Date(ts);
+    const isToday = new Date().toDateString() === date.toDateString();
+    return date.toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      weekday: isToday ? undefined : 'short' 
+    });
+  };
+
+  const isOverdue = todo.reminder && todo.reminder < Date.now() && !todo.completed;
 
   return (
     <div className="relative overflow-hidden rounded-xl mb-2 select-none touch-pan-y">
@@ -101,11 +110,19 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
           )}
         </button>
         
-        <span className={`flex-1 text-lg transition-all pointer-events-none ${
-          todo.completed ? 'line-through text-sage' : 'text-midnight dark:text-mint'
-        }`}>
-          {todo.text}
-        </span>
+        <div className="flex-1 flex flex-col pointer-events-none">
+          <span className={`text-lg transition-all ${
+            todo.completed ? 'line-through text-sage' : 'text-midnight dark:text-mint'
+          }`}>
+            {todo.text}
+          </span>
+          {todo.reminder && (
+            <span className={`text-xs flex items-center gap-1 mt-1 ${isOverdue ? 'text-red-500' : 'text-teal'}`}>
+              <Bell className="w-3 h-3" />
+              {formatReminder(todo.reminder)}
+            </span>
+          )}
+        </div>
         
         <span className="text-xs text-sage/70 hidden sm:block pointer-events-none">
           {new Date(todo.createdAt).toLocaleDateString()}
@@ -126,13 +143,15 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
   );
 };
 
-const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) => {
+const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, onDeleteTask }) => {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(
     categories.length > 0 ? categories[0].id : null
   );
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
+  const [reminderTime, setReminderTime] = useState('');
+  const [showReminderInput, setShowReminderInput] = useState(false);
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
 
@@ -168,6 +187,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
       text: newTaskText,
       completed: false,
       createdAt: Date.now(),
+      reminder: reminderTime ? new Date(reminderTime).getTime() : undefined
     };
 
     const updatedCategories = categories.map((cat) => {
@@ -179,6 +199,8 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
 
     setCategories(updatedCategories);
     setNewTaskText('');
+    setReminderTime('');
+    setShowReminderInput(false);
   };
 
   const toggleTask = (todoId: string) => {
@@ -197,6 +219,9 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
   };
 
   const deleteTask = (todoId: string) => {
+    // Find task first to pass to onDeleteTask
+    const taskToDelete = activeCategory?.todos.find(t => t.id === todoId);
+    
     const updatedCategories = categories.map((cat) => {
       if (cat.id === activeCategoryId) {
         return {
@@ -207,6 +232,11 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
       return cat;
     });
     setCategories(updatedCategories);
+
+    // Call prop to move to trash
+    if (taskToDelete && activeCategoryId) {
+      onDeleteTask(taskToDelete, activeCategoryId);
+    }
   };
 
   return (
@@ -286,7 +316,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
             </div>
 
             {/* Input */}
-            <form onSubmit={handleAddTask} className="p-4 bg-white dark:bg-deep border-b border-sage/20 dark:border-forest">
+            <form onSubmit={handleAddTask} className="p-4 bg-white dark:bg-deep border-b border-sage/20 dark:border-forest flex flex-col gap-2">
                <div className="relative group">
                  <input
                    type="text"
@@ -295,14 +325,39 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories }) 
                    placeholder="Add a new task..."
                    className="w-full pl-4 pr-12 py-4 text-lg bg-gray-50/50 dark:bg-midnight border-none rounded-xl focus:ring-2 focus:ring-teal outline-none text-midnight dark:text-mint placeholder-sage/60 transition-all"
                  />
-                 <button
-                   type="submit"
-                   disabled={!newTaskText.trim()}
-                   className="absolute right-2 top-2 bottom-2 aspect-square bg-teal text-mint rounded-lg hover:bg-forest disabled:opacity-50 disabled:hover:bg-teal transition-all flex items-center justify-center hover:scale-105 active:scale-95"
-                 >
-                   <Plus className="w-6 h-6" />
-                 </button>
+                 <div className="absolute right-2 top-2 bottom-2 flex items-center gap-1">
+                   {/* Reminder Button */}
+                   <button
+                    type="button"
+                    onClick={() => setShowReminderInput(!showReminderInput)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      showReminderInput || reminderTime ? 'text-teal bg-teal/10' : 'text-sage hover:text-teal hover:bg-sage/10'
+                    }`}
+                   >
+                     {reminderTime ? <Bell className="w-5 h-5 fill-current" /> : <Clock className="w-5 h-5" />}
+                   </button>
+                   
+                   <button
+                     type="submit"
+                     disabled={!newTaskText.trim()}
+                     className="aspect-square h-full bg-teal text-mint rounded-lg hover:bg-forest disabled:opacity-50 disabled:hover:bg-teal transition-all flex items-center justify-center hover:scale-105 active:scale-95"
+                   >
+                     <Plus className="w-6 h-6" />
+                   </button>
+                 </div>
                </div>
+               
+               {/* Reminder Date Picker */}
+               {showReminderInput && (
+                 <div className="animate-in slide-in-from-top-2 fade-in">
+                   <input
+                     type="datetime-local"
+                     value={reminderTime}
+                     onChange={(e) => setReminderTime(e.target.value)}
+                     className="w-full sm:w-auto px-3 py-2 bg-gray-50 dark:bg-midnight border border-sage/30 rounded-lg text-forest dark:text-sage text-sm focus:outline-none focus:border-teal"
+                   />
+                 </div>
+               )}
             </form>
 
             {/* List */}
