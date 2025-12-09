@@ -1,12 +1,31 @@
 import React, { useState, useRef } from 'react';
 import { Category, TodoItem } from '../types';
-import { Plus, Trash2, CheckCircle, Circle, Check, Calendar, Clock, Bell } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Check, Clock, Bell, CalendarPlus } from 'lucide-react';
 
 interface TodoManagerProps {
   categories: Category[];
   setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
   onDeleteTask: (task: TodoItem, categoryId: string) => void;
 }
+
+// --- Helper: Google Calendar Link Generator ---
+const createGoogleCalendarUrl = (text: string, timestamp: number) => {
+  const startDate = new Date(timestamp);
+  const endDate = new Date(timestamp + 60 * 60 * 1000); // Default 1 hour duration
+
+  const formatDate = (date: Date) => {
+    return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+  };
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: text,
+    dates: `${formatDate(startDate)}/${formatDate(endDate)}`,
+    details: 'Created via TaskFlow & Notes',
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
 
 // --- Swipeable Item Component ---
 interface SwipeableTodoItemProps {
@@ -71,6 +90,13 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
 
   const isOverdue = todo.reminder && todo.reminder < Date.now() && !todo.completed;
 
+  const handleCalendarClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (todo.reminder) {
+      window.open(createGoogleCalendarUrl(todo.text, todo.reminder), '_blank');
+    }
+  };
+
   return (
     <div className="relative overflow-hidden rounded-xl mb-2 select-none touch-pan-y">
       {/* Background Layer */}
@@ -117,10 +143,19 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
             {todo.text}
           </span>
           {todo.reminder && (
-            <span className={`text-xs flex items-center gap-1 mt-1 ${isOverdue ? 'text-red-500' : 'text-teal'}`}>
-              <Bell className="w-3 h-3" />
-              {formatReminder(todo.reminder)}
-            </span>
+            <div className="flex items-center gap-3 mt-1 pointer-events-auto">
+              <span className={`text-xs flex items-center gap-1 ${isOverdue ? 'text-red-500' : 'text-teal'}`}>
+                <Bell className="w-3 h-3" />
+                {formatReminder(todo.reminder)}
+              </span>
+              <button 
+                onClick={handleCalendarClick}
+                className="text-sage hover:text-teal transition-colors"
+                title="Add to Google Calendar"
+              >
+                <CalendarPlus className="w-3.5 h-3.5" />
+              </button>
+            </div>
           )}
         </div>
         
@@ -134,7 +169,7 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
             e.stopPropagation();
             deleteTask(todo.id);
           }}
-          className="opacity-0 group-hover:opacity-100 p-2 text-sage hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all hidden sm:block"
+          className="opacity-0 group-hover:opacity-100 p-2 text-sage hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all hidden sm:block pointer-events-auto"
         >
           <Trash2 className="w-5 h-5" />
         </button>
@@ -152,6 +187,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
   const [newTaskText, setNewTaskText] = useState('');
   const [reminderTime, setReminderTime] = useState('');
   const [showReminderInput, setShowReminderInput] = useState(false);
+  const [syncToCalendar, setSyncToCalendar] = useState(false);
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
 
@@ -182,12 +218,14 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
     e.preventDefault();
     if (!activeCategory || !newTaskText.trim()) return;
 
+    const reminderTimestamp = reminderTime ? new Date(reminderTime).getTime() : undefined;
+
     const newTask: TodoItem = {
       id: crypto.randomUUID(),
       text: newTaskText,
       completed: false,
       createdAt: Date.now(),
-      reminder: reminderTime ? new Date(reminderTime).getTime() : undefined
+      reminder: reminderTimestamp
     };
 
     const updatedCategories = categories.map((cat) => {
@@ -198,9 +236,16 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
     });
 
     setCategories(updatedCategories);
+    
+    // Handle Calendar Sync
+    if (syncToCalendar && reminderTimestamp) {
+      window.open(createGoogleCalendarUrl(newTaskText, reminderTimestamp), '_blank');
+    }
+
     setNewTaskText('');
     setReminderTime('');
     setShowReminderInput(false);
+    setSyncToCalendar(false);
   };
 
   const toggleTask = (todoId: string) => {
@@ -349,13 +394,22 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
                
                {/* Reminder Date Picker */}
                {showReminderInput && (
-                 <div className="animate-in slide-in-from-top-2 fade-in">
+                 <div className="animate-in slide-in-from-top-2 fade-in flex flex-wrap items-center gap-3">
                    <input
                      type="datetime-local"
                      value={reminderTime}
                      onChange={(e) => setReminderTime(e.target.value)}
-                     className="w-full sm:w-auto px-3 py-2 bg-gray-50 dark:bg-midnight border border-sage/30 rounded-lg text-forest dark:text-sage text-sm focus:outline-none focus:border-teal"
+                     className="flex-grow sm:flex-grow-0 px-3 py-2 bg-gray-50 dark:bg-midnight border border-sage/30 rounded-lg text-forest dark:text-sage text-sm focus:outline-none focus:border-teal"
                    />
+                   <label className="flex items-center space-x-2 text-sm text-sage dark:text-sage cursor-pointer select-none">
+                     <input 
+                      type="checkbox"
+                      checked={syncToCalendar}
+                      onChange={(e) => setSyncToCalendar(e.target.checked)}
+                      className="w-4 h-4 text-teal rounded border-sage/30 focus:ring-teal"
+                     />
+                     <span>Add to G-Cal</span>
+                   </label>
                  </div>
                )}
             </form>
