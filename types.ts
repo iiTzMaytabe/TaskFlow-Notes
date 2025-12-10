@@ -29,6 +29,8 @@ export interface DeletedTodoItem extends TodoItem {
 
 export type ViewMode = 'todos' | 'notes' | 'trash';
 
+export type Theme = 'nature' | 'sunset' | 'botanic' | 'celestial' | 'volcano' | 'earth';
+
 export interface AIState {
   isLoading: boolean;
   error: string | null;

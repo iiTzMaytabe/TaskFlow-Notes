@@ -3,18 +3,34 @@ import Layout from './components/Layout';
 import NotesManager from './components/NotesManager';
 import TodoManager from './components/TodoManager';
 import TrashManager from './components/TrashManager';
-import { ViewMode, Note, Category, DeletedTodoItem, TodoItem } from './types';
+import { ViewMode, Note, Category, DeletedTodoItem, TodoItem, Theme } from './types';
 
 const App: React.FC = () => {
   // --- State ---
   const [activeView, setActiveView] = useState<ViewMode>('todos');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<Theme>('nature');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   
   // Initialize with some default data or empty arrays
   const [notes, setNotes] = useState<Note[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [deletedTasks, setDeletedTasks] = useState<DeletedTodoItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // --- Network Status Logic ---
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // --- Persistence Logic ---
 
@@ -24,6 +40,7 @@ const App: React.FC = () => {
       const savedNotes = localStorage.getItem('tf_notes');
       const savedCategories = localStorage.getItem('tf_categories');
       const savedDeletedTasks = localStorage.getItem('tf_deleted_tasks');
+      const savedMode = localStorage.getItem('tf_mode');
       const savedTheme = localStorage.getItem('tf_theme');
 
       if (savedNotes) setNotes(JSON.parse(savedNotes));
@@ -32,7 +49,7 @@ const App: React.FC = () => {
         setNotes([{
           id: 'welcome-note',
           title: 'Welcome to Notes',
-          content: 'This is your new notebook. You can write anything here.',
+          content: 'This is your new notebook. You can write anything here. It works offline!',
           createdAt: Date.now(),
           updatedAt: Date.now(),
           isDeleted: false
@@ -48,16 +65,21 @@ const App: React.FC = () => {
           createdAt: Date.now(),
           todos: [
             { id: 't1', text: 'Explore the new theme', completed: false, createdAt: Date.now() },
-            { id: 't2', text: 'Try Dark Mode', completed: true, createdAt: Date.now() }
+            { id: 't2', text: 'Try Offline Mode', completed: true, createdAt: Date.now() }
           ]
         }]);
       }
 
       if (savedDeletedTasks) setDeletedTasks(JSON.parse(savedDeletedTasks));
 
-      if (savedTheme === 'dark') {
+      if (savedMode === 'dark') {
         setIsDarkMode(true);
         document.documentElement.classList.add('dark');
+      }
+
+      if (savedTheme) {
+        setCurrentTheme(savedTheme as Theme);
+        document.documentElement.setAttribute('data-theme', savedTheme);
       }
     } catch (e) {
       console.error("Failed to load data", e);
@@ -83,14 +105,20 @@ const App: React.FC = () => {
   }, [deletedTasks, isLoaded]);
 
   // --- Theme Logic ---
-  const toggleTheme = () => {
+  const toggleThemeMode = () => {
     setIsDarkMode(prev => {
       const newMode = !prev;
       if (newMode) document.documentElement.classList.add('dark');
       else document.documentElement.classList.remove('dark');
-      localStorage.setItem('tf_theme', newMode ? 'dark' : 'light');
+      localStorage.setItem('tf_mode', newMode ? 'dark' : 'light');
       return newMode;
     });
+  };
+
+  const handleSetTheme = (theme: Theme) => {
+    setCurrentTheme(theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('tf_theme', theme);
   };
 
   // --- Trash Logic ---
@@ -155,7 +183,10 @@ const App: React.FC = () => {
       activeView={activeView}
       onSwitchView={setActiveView}
       isDarkMode={isDarkMode}
-      toggleTheme={toggleTheme}
+      toggleThemeMode={toggleThemeMode}
+      currentTheme={currentTheme}
+      setTheme={handleSetTheme}
+      isOnline={isOnline}
     >
       <div className={`transition-opacity duration-300 ${activeView === 'todos' ? 'opacity-100' : 'hidden opacity-0'}`} style={{ display: activeView === 'todos' ? 'block' : 'none' }}>
         <TodoManager 

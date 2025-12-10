@@ -20,13 +20,13 @@
         theme: {
           extend: {
             colors: {
-              // Custom Palette
-              midnight: '#051F20',
-              deep: '#0B2B26',
-              forest: '#163832',
-              teal: '#235347',
-              sage: '#8EB69B',
-              mint: '#DAF1DE',
+              // Custom Palette using CSS Variables for Theming
+              midnight: 'rgb(var(--color-midnight) / <alpha-value>)',
+              deep: 'rgb(var(--color-deep) / <alpha-value>)',
+              forest: 'rgb(var(--color-forest) / <alpha-value>)',
+              teal: 'rgb(var(--color-teal) / <alpha-value>)',
+              sage: 'rgb(var(--color-sage) / <alpha-value>)',
+              mint: 'rgb(var(--color-mint) / <alpha-value>)',
             }
           }
         }
@@ -34,6 +34,66 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+      :root {
+        /* Default (Nature) */
+        --color-midnight: 5 31 32;      /* #051F20 */
+        --color-deep: 11 43 38;          /* #0B2B26 */
+        --color-forest: 22 56 50;        /* #163832 */
+        --color-teal: 35 83 71;          /* #235347 */
+        --color-sage: 142 182 155;       /* #8EB69B */
+        --color-mint: 218 241 222;       /* #DAF1DE */
+      }
+
+      [data-theme="sunset"] {
+        /* Palette 161 - Sunset (Purple/Peach) */
+        --color-midnight: 38 35 53;      /* #262335 */
+        --color-deep: 25 20 40;          /* Darker custom for deep bg */
+        --color-forest: 70 54 153;       /* #463699 */
+        --color-teal: 138 131 218;       /* #8A83DA - using lighter purple as primary accent */
+        --color-sage: 199 194 206;       /* #C7C2CE */
+        --color-mint: 251 245 240;       /* #FBF5F0 */
+      }
+
+      [data-theme="botanic"] {
+        /* Palette 160 - Botanic (Green/Blue) */
+        --color-midnight: 33 38 58;      /* #21263A */
+        --color-deep: 21 24 35;          /* Darker version of #21263A */
+        --color-forest: 21 121 84;       /* #157954 */
+        --color-teal: 21 121 84;         /* #157954 - Green as main */
+        --color-sage: 199 206 232;       /* #C7CEE8 */
+        --color-mint: 214 217 216;       /* #D6D9D8 */
+      }
+
+      [data-theme="celestial"] {
+        /* Palette 148 - Celestial (Navy/Gold) */
+        --color-midnight: 0 4 53;        /* #000435 */
+        --color-deep: 0 2 30;            /* #00021E */
+        --color-forest: 0 68 102;        /* #004466 */
+        --color-teal: 228 181 93;        /* #E4B55D - Gold as accent */
+        --color-sage: 169 196 196;       /* #A9C4C4 */
+        --color-mint: 240 238 235;       /* Lightened #E1DED9 */
+      }
+
+      [data-theme="volcano"] {
+        /* Palette 96 - Volcano (Red/Orange) */
+        --color-midnight: 16 12 8;       /* #100C08 */
+        --color-deep: 0 0 0;             /* #000000 */
+        --color-forest: 149 18 44;       /* #95122C */
+        --color-teal: 202 63 22;         /* #CA3F16 */
+        --color-sage: 219 224 225;       /* #DBE0E1 */
+        --color-mint: 243 244 245;       /* #F3F4F5 */
+      }
+
+      [data-theme="earth"] {
+        /* Palette 158 - Earth (Olive/Brown) */
+        --color-midnight: 52 28 2;       /* #341C02 */
+        --color-deep: 35 18 1;           /* Darker brown */
+        --color-forest: 79 83 31;        /* #4F531F */
+        --color-teal: 120 125 45;        /* Lighter Olive for accent */
+        --color-sage: 226 216 195;       /* #E2D8C3 */
+        --color-mint: 246 244 236;       /* #F6F4EC */
+      }
+
       body {
         font-family: 'Inter', sans-serif;
         transition: background-color 0.3s, color 0.3s;
