@@ -52,7 +52,7 @@ const SwipeableNoteItem: React.FC<SwipeableNoteItemProps> = ({ note, isSelected,
   };
 
   return (
-    <div className="relative overflow-hidden mb-1 rounded-xl select-none touch-pan-y">
+    <div className="relative overflow-hidden mb-2 rounded-xl select-none touch-pan-y">
       {/* Background (Delete) */}
       <div className="absolute inset-0 bg-red-500 flex items-center justify-end pr-4 rounded-xl">
         <Trash2 className="w-5 h-5 text-white" />
@@ -66,10 +66,10 @@ const SwipeableNoteItem: React.FC<SwipeableNoteItemProps> = ({ note, isSelected,
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        className={`relative group p-3 rounded-xl cursor-pointer bg-white dark:bg-deep transition-all duration-200 border ${
+        className={`relative group p-4 rounded-xl cursor-pointer backdrop-blur-md transition-all duration-200 border ${
           isSelected
-            ? 'bg-sage/20 dark:bg-forest border-teal'
-            : 'hover:bg-mint/50 dark:hover:bg-forest/50 border-transparent'
+            ? 'bg-white/80 dark:bg-white/10 border-teal shadow-md'
+            : 'bg-white/40 dark:bg-deep/40 hover:bg-white/60 dark:hover:bg-deep/60 border-transparent hover:shadow-sm'
         }`}
       >
         <div className="flex justify-between items-start pointer-events-none">
@@ -92,7 +92,7 @@ const SwipeableNoteItem: React.FC<SwipeableNoteItemProps> = ({ note, isSelected,
         <p className="text-xs text-sage dark:text-sage mt-1 flex items-center pointer-events-none pl-6">
            {formatDate(note.updatedAt)}
         </p>
-        <p className="text-sm text-forest/70 dark:text-gray-400 line-clamp-2 mt-1 pointer-events-none pl-6">
+        <p className="text-sm text-forest/70 dark:text-gray-400 line-clamp-2 mt-2 pointer-events-none pl-6">
           {note.content || 'No additional text'}
         </p>
       </div>
@@ -161,19 +161,19 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-12rem)] bg-white dark:bg-deep rounded-2xl shadow-xl border border-sage/30 dark:border-forest overflow-hidden">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-12rem)] bg-white/40 dark:bg-deep/40 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 dark:border-white/5 overflow-hidden">
       {/* Sidebar List */}
-      <div className="w-full md:w-1/3 border-r border-sage/30 dark:border-forest flex flex-col">
-        <div className="p-4 border-b border-sage/30 dark:border-forest flex justify-between items-center bg-mint/30 dark:bg-forest/30">
-          <h2 className="font-semibold text-deep dark:text-mint">All Notes</h2>
+      <div className="w-full md:w-1/3 border-r border-white/20 dark:border-white/5 flex flex-col bg-white/30 dark:bg-black/10">
+        <div className="p-4 border-b border-white/20 dark:border-white/5 flex justify-between items-center">
+          <h2 className="font-semibold text-deep dark:text-mint ml-2">All Notes</h2>
           <button
             onClick={handleCreateNote}
-            className="p-2 bg-teal text-mint rounded-lg hover:bg-forest transition-colors shadow-sm active:scale-95"
+            className="btn-liquid p-2 rounded-full"
           >
             <Plus className="w-5 h-5" />
           </button>
         </div>
-        <div className="overflow-y-auto flex-1 p-2 space-y-1 bg-white/50 dark:bg-deep">
+        <div className="overflow-y-auto flex-1 p-3 space-y-1">
           {visibleNotes.length === 0 ? (
             <div className="text-center py-10 text-sage text-sm">
               No notes yet. <br /> Click + to create one.
@@ -194,10 +194,10 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
       </div>
 
       {/* Editor Area */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-deep">
+      <div className="flex-1 flex flex-col bg-white/20 dark:bg-transparent">
         {activeNote ? (
           <>
-            <div className="p-4 border-b border-sage/30 dark:border-forest flex justify-between items-center">
+            <div className="p-4 border-b border-white/20 dark:border-white/5 flex justify-between items-center">
               <span className="text-xs text-sage flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Created {formatDate(activeNote.createdAt)}
@@ -208,13 +208,13 @@ const NotesManager: React.FC<NotesManagerProps> = ({ notes, setNotes }) => {
                  </span>
               </div>
             </div>
-            <div className="p-6 flex-1 flex flex-col h-full overflow-hidden">
+            <div className="p-8 flex-1 flex flex-col h-full overflow-hidden">
               <input
                 type="text"
                 value={activeNote.title}
                 onChange={(e) => handleUpdateNote('title', e.target.value)}
                 placeholder="Note Title"
-                className="text-3xl font-bold bg-transparent border-none outline-none text-midnight dark:text-mint placeholder-sage/50 mb-4"
+                className="text-4xl font-bold bg-transparent border-none outline-none text-midnight dark:text-mint placeholder-sage/50 mb-6"
               />
               <textarea
                 value={activeNote.content}

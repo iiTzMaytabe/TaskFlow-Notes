@@ -119,8 +119,8 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        className={`relative group flex items-center gap-3 p-4 bg-white dark:bg-deep border border-sage/30 dark:border-forest rounded-xl transition-shadow ${
-          todo.completed ? 'opacity-60 bg-gray-50 dark:bg-deep/50' : 'hover:shadow-md'
+        className={`relative group flex items-center gap-3 p-4 bg-white/60 dark:bg-deep/60 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl transition-shadow ${
+          todo.completed ? 'opacity-60 grayscale' : 'hover:shadow-lg'
         }`}
       >
         <button
@@ -288,19 +288,19 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
     <div className="flex flex-col h-[calc(100vh-12rem)] space-y-6">
       
       {/* Category Scroll Bar */}
-      <div className="flex items-center space-x-4 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex items-center space-x-3 overflow-x-auto pb-4 pt-1 scrollbar-hide px-1">
         {categories.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setActiveCategoryId(cat.id)}
-            className={`group relative flex items-center space-x-2 px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 border hover:scale-105 active:scale-95 ${
+            className={`group relative flex items-center space-x-2 px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 ${
               activeCategoryId === cat.id
-                ? 'bg-teal text-mint border-teal shadow-lg shadow-teal/30 scale-100'
-                : 'bg-white dark:bg-deep text-forest dark:text-sage border-sage/30 dark:border-forest hover:border-teal'
+                ? 'btn-liquid'
+                : 'btn-glass text-forest dark:text-sage'
             }`}
           >
             <span className="font-medium">{cat.name}</span>
-            <span className={`text-xs ml-2 px-1.5 py-0.5 rounded-full transition-colors ${activeCategoryId === cat.id ? 'bg-forest/50 text-mint' : 'bg-gray-100 dark:bg-forest/50'}`}>
+            <span className={`text-xs ml-2 px-1.5 py-0.5 rounded-full transition-colors ${activeCategoryId === cat.id ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-forest/50'}`}>
               {cat.todos.filter(t => !t.completed).length}
             </span>
             {activeCategoryId === cat.id && (
@@ -326,12 +326,12 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
               onBlur={() => !newCategoryName && setIsAddingCategory(false)}
-              placeholder="New Category..."
-              className="px-4 py-2.5 rounded-full border border-teal focus:ring-2 focus:ring-teal outline-none dark:bg-deep dark:border-teal dark:text-mint transition-all"
+              placeholder="New List..."
+              className="px-4 py-2.5 rounded-full bg-white/50 backdrop-blur-sm border border-teal focus:ring-2 focus:ring-teal outline-none dark:bg-deep/50 dark:border-teal dark:text-mint transition-all w-32"
             />
             <button
               type="submit"
-              className="p-2.5 bg-teal text-mint rounded-full hover:bg-forest shadow-md hover:scale-110 active:scale-90 transition-transform"
+              className="btn-liquid p-2.5 rounded-full"
             >
               <Plus className="w-5 h-5" />
             </button>
@@ -339,7 +339,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
         ) : (
           <button
             onClick={() => setIsAddingCategory(true)}
-            className="flex items-center space-x-1 px-4 py-2.5 rounded-full border border-dashed border-sage text-sage hover:text-teal hover:border-teal hover:bg-teal/5 dark:hover:bg-forest/30 transition-all hover:scale-105 active:scale-95"
+            className="btn-glass flex items-center space-x-1 px-4 py-2.5 rounded-full text-sage hover:text-teal"
           >
             <Plus className="w-4 h-4" />
             <span>Add List</span>
@@ -348,10 +348,10 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
       </div>
 
       {/* Main Todo Area */}
-      <div className="flex-1 bg-white dark:bg-deep rounded-2xl shadow-xl border border-sage/30 dark:border-forest flex flex-col overflow-hidden transition-all duration-300">
+      <div className="flex-1 bg-white/40 dark:bg-deep/40 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 dark:border-white/5 flex flex-col overflow-hidden transition-all duration-300">
         {activeCategory ? (
           <>
-            <div className="p-6 border-b border-sage/30 dark:border-forest bg-mint/20 dark:bg-forest/20 flex flex-col sm:flex-row gap-4 justify-between items-center">
+            <div className="p-6 border-b border-white/20 dark:border-white/5 flex flex-col sm:flex-row gap-4 justify-between items-center">
               <div>
                 <h2 className="text-2xl font-bold text-midnight dark:text-mint">{activeCategory.name}</h2>
                 <p className="text-sm text-sage dark:text-sage mt-1">
@@ -361,22 +361,22 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
             </div>
 
             {/* Input */}
-            <form onSubmit={handleAddTask} className="p-4 bg-white dark:bg-deep border-b border-sage/20 dark:border-forest flex flex-col gap-2">
+            <form onSubmit={handleAddTask} className="p-4 border-b border-white/20 dark:border-white/5 flex flex-col gap-2">
                <div className="relative group">
                  <input
                    type="text"
                    value={newTaskText}
                    onChange={(e) => setNewTaskText(e.target.value)}
                    placeholder="Add a new task..."
-                   className="w-full pl-4 pr-12 py-4 text-lg bg-gray-50/50 dark:bg-midnight border-none rounded-xl focus:ring-2 focus:ring-teal outline-none text-midnight dark:text-mint placeholder-sage/60 transition-all"
+                   className="w-full pl-5 pr-14 py-4 text-lg bg-white/60 dark:bg-black/20 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-teal/50 outline-none text-midnight dark:text-mint placeholder-sage/60 transition-all shadow-inner"
                  />
-                 <div className="absolute right-2 top-2 bottom-2 flex items-center gap-1">
+                 <div className="absolute right-2 top-2 bottom-2 flex items-center gap-2">
                    {/* Reminder Button */}
                    <button
                     type="button"
                     onClick={() => setShowReminderInput(!showReminderInput)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      showReminderInput || reminderTime ? 'text-teal bg-teal/10' : 'text-sage hover:text-teal hover:bg-sage/10'
+                    className={`p-2 rounded-xl transition-colors btn-glass ${
+                      showReminderInput || reminderTime ? 'text-teal border-teal/50' : 'text-sage hover:text-teal'
                     }`}
                    >
                      {reminderTime ? <Bell className="w-5 h-5 fill-current" /> : <Clock className="w-5 h-5" />}
@@ -385,7 +385,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
                    <button
                      type="submit"
                      disabled={!newTaskText.trim()}
-                     className="aspect-square h-full bg-teal text-mint rounded-lg hover:bg-forest disabled:opacity-50 disabled:hover:bg-teal transition-all flex items-center justify-center hover:scale-105 active:scale-95"
+                     className="btn-liquid aspect-square h-full rounded-xl flex items-center justify-center disabled:opacity-50 disabled:filter-none"
                    >
                      <Plus className="w-6 h-6" />
                    </button>
@@ -394,12 +394,12 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
                
                {/* Reminder Date Picker */}
                {showReminderInput && (
-                 <div className="animate-in slide-in-from-top-2 fade-in flex flex-wrap items-center gap-3">
+                 <div className="animate-in slide-in-from-top-2 fade-in flex flex-wrap items-center gap-3 p-2 bg-white/30 dark:bg-black/10 rounded-xl">
                    <input
                      type="datetime-local"
                      value={reminderTime}
                      onChange={(e) => setReminderTime(e.target.value)}
-                     className="flex-grow sm:flex-grow-0 px-3 py-2 bg-gray-50 dark:bg-midnight border border-sage/30 rounded-lg text-forest dark:text-sage text-sm focus:outline-none focus:border-teal"
+                     className="flex-grow sm:flex-grow-0 px-3 py-2 bg-white/50 dark:bg-midnight/50 border border-white/30 rounded-lg text-forest dark:text-sage text-sm focus:outline-none focus:border-teal"
                    />
                    <label className="flex items-center space-x-2 text-sm text-sage dark:text-sage cursor-pointer select-none">
                      <input 
@@ -415,11 +415,11 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
             </form>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-sage/50 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-sage/50 scrollbar-track-transparent">
               {activeCategory.todos.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-sage space-y-4 animate-in fade-in zoom-in-95 duration-500">
-                  <div className="w-16 h-16 rounded-full bg-mint dark:bg-forest flex items-center justify-center">
-                    <CheckCircle className="w-8 h-8 opacity-40 text-teal" />
+                  <div className="w-16 h-16 rounded-full bg-mint/50 dark:bg-forest/50 flex items-center justify-center backdrop-blur-sm">
+                    <CheckCircle className="w-8 h-8 opacity-50 text-teal" />
                   </div>
                   <p>No tasks yet.</p>
                 </div>
@@ -437,7 +437,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
           </>
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-sage animate-in fade-in zoom-in-95 duration-500">
-            <p className="text-lg">Select a category or create a new one to get started.</p>
+            <p className="text-lg font-medium">Select a category to view tasks</p>
           </div>
         )}
       </div>

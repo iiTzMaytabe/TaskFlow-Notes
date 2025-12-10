@@ -55,36 +55,36 @@ const Layout: React.FC<LayoutProps> = ({
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/60 dark:bg-deep/80 backdrop-blur-md border-b border-sage/30 dark:border-forest shadow-sm">
+      <header className="sticky top-0 z-20 bg-mint/50 dark:bg-midnight/50 backdrop-blur-lg border-b border-white/20 dark:border-white/10 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2 group cursor-default">
-            <div className="bg-teal p-2 rounded-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm">
+            <div className="btn-liquid p-2 rounded-xl">
               <ClipboardList className="w-6 h-6 text-mint" />
             </div>
             <h1 className="text-xl font-bold text-midnight dark:text-mint hidden sm:block tracking-tight">
-              TaskFlow & Notes
+              TaskFlow
             </h1>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex bg-sage/20 dark:bg-forest rounded-lg p-1 space-x-1 overflow-x-auto scrollbar-hide">
+          {/* Navigation Tabs (Liquid Glass Style) */}
+          <div className="flex p-1 space-x-2 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => onSwitchView('todos')}
-              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform whitespace-nowrap ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
                 activeView === 'todos'
-                  ? 'bg-teal text-mint shadow-md scale-100'
-                  : 'text-forest dark:text-sage hover:text-teal dark:hover:text-mint hover:bg-white/50 dark:hover:bg-deep/50 hover:scale-105 active:scale-95'
+                  ? 'btn-liquid'
+                  : 'btn-glass text-forest dark:text-sage hover:text-teal'
               }`}
             >
               <ClipboardList className="w-4 h-4" />
-              <span>To-Do List</span>
+              <span>To-Do</span>
             </button>
             <button
               onClick={() => onSwitchView('notes')}
-              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform whitespace-nowrap ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
                 activeView === 'notes'
-                  ? 'bg-teal text-mint shadow-md scale-100'
-                  : 'text-forest dark:text-sage hover:text-teal dark:hover:text-mint hover:bg-white/50 dark:hover:bg-deep/50 hover:scale-105 active:scale-95'
+                  ? 'btn-liquid'
+                  : 'btn-glass text-forest dark:text-sage hover:text-teal'
               }`}
             >
               <Book className="w-4 h-4" />
@@ -92,10 +92,10 @@ const Layout: React.FC<LayoutProps> = ({
             </button>
             <button
               onClick={() => onSwitchView('trash')}
-              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 transform whitespace-nowrap ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
                 activeView === 'trash'
-                  ? 'bg-red-500/90 text-white shadow-md scale-100'
-                  : 'text-forest dark:text-sage hover:text-red-500 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-deep/50 hover:scale-105 active:scale-95'
+                  ? 'btn-liquid' // You might want a red liquid button here, but consistency is key
+                  : 'btn-glass text-forest dark:text-sage hover:text-red-500'
               }`}
             >
               <Trash2 className="w-4 h-4" />
@@ -106,9 +106,9 @@ const Layout: React.FC<LayoutProps> = ({
           {/* Theme & Network Controls */}
           <div className="flex items-center space-x-2">
             
-            {/* Network Status Icon (only shows when offline or transitioning) */}
+            {/* Network Status Icon */}
             {!isOnline && (
-              <div className="p-2 text-amber-500" title="Offline Mode">
+              <div className="p-2 text-amber-500 btn-glass rounded-full" title="Offline Mode">
                 <WifiOff className="w-5 h-5" />
               </div>
             )}
@@ -117,14 +117,15 @@ const Layout: React.FC<LayoutProps> = ({
             <div className="relative" ref={paletteRef}>
               <button
                 onClick={() => setShowPalette(!showPalette)}
-                className="p-2 rounded-full hover:bg-sage/20 dark:hover:bg-forest transition-all duration-300 text-teal dark:text-sage hover:scale-110"
+                className="p-2 rounded-full btn-glass text-teal dark:text-sage"
                 aria-label="Change Theme"
               >
                 <Palette className="w-5 h-5" />
               </button>
               
               {showPalette && (
-                <div className="absolute right-0 top-12 mt-2 w-48 bg-white dark:bg-deep rounded-xl shadow-xl border border-sage/30 dark:border-forest p-3 animate-in fade-in slide-in-from-top-2 z-50">
+                <div className="absolute right-0 top-14 mt-2 w-56 bg-white/80 dark:bg-deep/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 dark:border-white/10 p-4 animate-in fade-in slide-in-from-top-2 z-50">
+                   <h3 className="text-xs font-bold text-sage mb-3 uppercase tracking-wider">Select Theme</h3>
                    <div className="grid grid-cols-3 gap-3">
                      {THEMES.map((theme) => (
                        <button
@@ -133,14 +134,13 @@ const Layout: React.FC<LayoutProps> = ({
                            setTheme(theme.id);
                            setShowPalette(false);
                          }}
-                         className={`relative w-10 h-10 rounded-full flex items-center justify-center border-2 transition-transform hover:scale-110 ${
-                           currentTheme === theme.id ? 'border-teal' : 'border-transparent'
+                         className={`relative w-12 h-12 rounded-full flex items-center justify-center border-2 transition-transform hover:scale-110 shadow-md ${
+                           currentTheme === theme.id ? 'border-teal ring-2 ring-teal/30' : 'border-transparent'
                          }`}
                          title={theme.name}
                        >
                          <div 
-                           className="w-full h-full rounded-full overflow-hidden flex"
-                           style={{ transform: 'rotate(45deg)' }}
+                           className="w-full h-full rounded-full overflow-hidden flex transform rotate-45"
                          >
                             <div className="w-1/2 h-full" style={{ backgroundColor: theme.colors[0] }}></div>
                             <div className="w-1/2 h-full" style={{ backgroundColor: theme.colors[1] }}></div>
@@ -155,7 +155,7 @@ const Layout: React.FC<LayoutProps> = ({
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleThemeMode}
-              className="p-2 rounded-full hover:bg-sage/20 dark:hover:bg-forest transition-all duration-300 text-teal dark:text-sage hover:scale-110 hover:rotate-12 active:scale-90"
+              className="p-2 rounded-full btn-glass text-teal dark:text-sage"
               aria-label="Toggle Dark Mode"
             >
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

@@ -20,8 +20,8 @@ const TrashManager: React.FC<TrashManagerProps> = ({
   onDeleteTaskForever,
 }) => {
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)] bg-white dark:bg-deep rounded-2xl shadow-xl border border-sage/30 dark:border-forest overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-      <div className="p-4 border-b border-sage/30 dark:border-forest bg-mint/30 dark:bg-forest/30 flex items-center justify-between">
+    <div className="flex flex-col h-[calc(100vh-12rem)] bg-white/40 dark:bg-deep/40 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/40 dark:border-white/5 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+      <div className="p-4 border-b border-white/20 dark:border-white/5 bg-white/20 dark:bg-white/5 flex items-center justify-between">
         <h2 className="font-semibold text-deep dark:text-mint flex items-center gap-2">
           <Trash2 className="w-5 h-5 text-teal" />
           Recycle Bin
@@ -44,9 +44,9 @@ const TrashManager: React.FC<TrashManagerProps> = ({
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase text-sage tracking-wider px-1">Notes</h3>
                 {deletedNotes.map((note) => (
-                  <div key={note.id} className="group flex items-center justify-between p-3 bg-white/50 dark:bg-forest/20 border border-sage/20 dark:border-forest rounded-xl hover:border-teal transition-colors">
+                  <div key={note.id} className="group flex items-center justify-between p-3 bg-white/40 dark:bg-forest/20 border border-white/20 dark:border-white/5 rounded-2xl hover:border-teal transition-colors">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <div className="p-2 bg-sage/10 rounded-lg text-teal">
+                      <div className="p-2 bg-sage/10 rounded-xl text-teal">
                         <FileText className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
@@ -54,18 +54,18 @@ const TrashManager: React.FC<TrashManagerProps> = ({
                         <p className="text-xs text-sage truncate">{note.content || 'No content'}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => onRestoreNote(note.id)}
                         title="Restore"
-                        className="p-2 text-sage hover:text-teal hover:bg-teal/10 rounded-lg transition-colors"
+                        className="p-2 btn-glass rounded-lg text-teal"
                       >
                         <RotateCcw className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => onDeleteNoteForever(note.id)}
                         title="Delete Forever"
-                        className="p-2 text-sage hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-2 btn-glass rounded-lg text-red-500"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -80,9 +80,9 @@ const TrashManager: React.FC<TrashManagerProps> = ({
               <div className="space-y-3">
                 <h3 className="text-xs font-bold uppercase text-sage tracking-wider px-1">Tasks</h3>
                 {deletedTasks.map((task) => (
-                  <div key={task.id} className="group flex items-center justify-between p-3 bg-white/50 dark:bg-forest/20 border border-sage/20 dark:border-forest rounded-xl hover:border-teal transition-colors">
+                  <div key={task.id} className="group flex items-center justify-between p-3 bg-white/40 dark:bg-forest/20 border border-white/20 dark:border-white/5 rounded-2xl hover:border-teal transition-colors">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <div className="p-2 bg-sage/10 rounded-lg text-teal">
+                      <div className="p-2 bg-sage/10 rounded-xl text-teal">
                         {task.completed ? <CheckCircle className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                       </div>
                       <div className="min-w-0">
@@ -94,18 +94,18 @@ const TrashManager: React.FC<TrashManagerProps> = ({
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => onRestoreTask(task)}
                         title="Restore"
-                        className="p-2 text-sage hover:text-teal hover:bg-teal/10 rounded-lg transition-colors"
+                        className="p-2 btn-glass rounded-lg text-teal"
                       >
                         <RotateCcw className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => onDeleteTaskForever(task.id)}
                         title="Delete Forever"
-                        className="p-2 text-sage hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-2 btn-glass rounded-lg text-red-500"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
