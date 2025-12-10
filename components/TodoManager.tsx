@@ -293,9 +293,9 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
           <button
             key={cat.id}
             onClick={() => setActiveCategoryId(cat.id)}
-            className={`group relative flex items-center space-x-2 px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 ${
+            className={`group relative shrink-0 flex items-center space-x-2 px-5 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 ${
               activeCategoryId === cat.id
-                ? 'btn-liquid'
+                ? 'btn-liquid pr-11' // Increased padding for internal delete button
                 : 'btn-glass text-forest dark:text-sage'
             }`}
           >
@@ -309,9 +309,10 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
                   e.stopPropagation();
                   handleDeleteCategory(cat.id);
                 }}
-                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-600 hover:scale-110"
+                // Positioned inside the pill (right-1.5) to avoid clipping by overflow:hidden
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-red-600 hover:scale-110"
               >
-                <Trash2 className="w-3 h-3" />
+                <Trash2 className="w-3.5 h-3.5" />
               </div>
             )}
           </button>
@@ -319,7 +320,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
         
         {/* Add Category Button */}
         {isAddingCategory ? (
-          <form onSubmit={handleAddCategory} className="flex items-center space-x-2 animate-in fade-in slide-in-from-left-2">
+          <form onSubmit={handleAddCategory} className="flex items-center space-x-2 animate-in fade-in slide-in-from-left-2 shrink-0">
             <input
               autoFocus
               type="text"
@@ -339,7 +340,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
         ) : (
           <button
             onClick={() => setIsAddingCategory(true)}
-            className="btn-glass flex items-center space-x-1 px-4 py-2.5 rounded-full text-sage hover:text-teal"
+            className="btn-glass flex items-center space-x-1 px-4 py-2.5 rounded-full text-sage hover:text-teal shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Add List</span>

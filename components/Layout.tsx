@@ -70,7 +70,7 @@ const Layout: React.FC<LayoutProps> = ({
           <div className="flex p-1 space-x-2 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => onSwitchView('todos')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shrink-0 ${
                 activeView === 'todos'
                   ? 'btn-liquid'
                   : 'btn-glass text-forest dark:text-sage hover:text-teal'
@@ -81,7 +81,7 @@ const Layout: React.FC<LayoutProps> = ({
             </button>
             <button
               onClick={() => onSwitchView('notes')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shrink-0 ${
                 activeView === 'notes'
                   ? 'btn-liquid'
                   : 'btn-glass text-forest dark:text-sage hover:text-teal'
@@ -92,7 +92,7 @@ const Layout: React.FC<LayoutProps> = ({
             </button>
             <button
               onClick={() => onSwitchView('trash')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shrink-0 ${
                 activeView === 'trash'
                   ? 'btn-liquid' // You might want a red liquid button here, but consistency is key
                   : 'btn-glass text-forest dark:text-sage hover:text-red-500'
