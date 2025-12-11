@@ -97,18 +97,33 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
     }
   };
 
+  // Determine styles based on swipe state
+  const isSwipingRight = offsetX > 0;
+  const isSwipingLeft = offsetX < 0;
+  
+  // Background Color Logic:
+  // - Default (offsetX === 0): Transparent (to prevent color bleeding through glass)
+  // - Right Swipe: Teal
+  // - Left Swipe: Midnight (Synced with Theme)
+  const swipeBgClass = isSwipingRight 
+    ? 'bg-teal justify-start' 
+    : isSwipingLeft 
+      ? 'bg-midnight dark:bg-black justify-end' 
+      : 'bg-transparent justify-end';
+
   return (
-    <div className="relative overflow-hidden rounded-xl mb-2 select-none touch-pan-y">
-      {/* Background Layer */}
+    <div className="relative overflow-hidden rounded-xl mb-3 select-none touch-pan-y shadow-sm">
+      {/* Background Layer (Swipe Actions) */}
       <div 
-        className={`absolute inset-0 flex items-center px-6 rounded-xl transition-colors duration-200 ${
-          offsetX > 0 ? 'bg-teal justify-start' : 'bg-red-500 justify-end'
-        }`}
+        className={`absolute inset-0 flex items-center px-6 rounded-xl transition-colors duration-200 ${swipeBgClass}`}
       >
-        {offsetX > 0 ? (
-          <Check className="w-6 h-6 text-mint" />
+        {isSwipingRight ? (
+          <Check className="w-6 h-6 text-white scale-110" />
         ) : (
-          <Trash2 className="w-6 h-6 text-white" />
+          <Trash2 
+            className={`w-6 h-6 text-white transition-all duration-200 ${isSwipingLeft ? 'opacity-100' : 'opacity-0'}`} 
+            style={{ transform: `scale(${Math.min(1.2, Math.max(0.8, Math.abs(offsetX) / 50))})` }} 
+          />
         )}
       </div>
 
@@ -119,13 +134,15 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        className={`relative group flex items-center gap-3 p-4 bg-white/60 dark:bg-deep/60 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl transition-shadow ${
-          todo.completed ? 'opacity-60 grayscale' : 'hover:shadow-lg'
+        className={`relative group flex items-center gap-3 p-4 rounded-xl border border-white/20 dark:border-white/5 transition-all duration-200 ${
+          todo.completed 
+            ? 'bg-white/30 dark:bg-white/5 opacity-60 grayscale border-l-4 border-l-sage' 
+            : 'bg-white/60 dark:bg-white/5 backdrop-blur-md hover:shadow-md hover:bg-white/70 dark:hover:bg-white/10 border-l-4 border-l-teal'
         }`}
       >
         <button
           onClick={() => toggleTask(todo.id)}
-          className={`flex-shrink-0 transition-colors z-10 ${
+          className={`flex-shrink-0 transition-colors z-10 p-1 rounded-full ${
             todo.completed ? 'text-sage' : 'text-sage hover:text-teal'
           }`}
         >
@@ -136,15 +153,15 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
           )}
         </button>
         
-        <div className="flex-1 flex flex-col pointer-events-none">
-          <span className={`text-lg transition-all ${
-            todo.completed ? 'line-through text-sage' : 'text-midnight dark:text-mint'
+        <div className="flex-1 flex flex-col pointer-events-none min-w-0">
+          <span className={`text-base font-medium truncate transition-all ${
+            todo.completed ? 'line-through text-sage' : 'text-midnight dark:text-gray-200'
           }`}>
             {todo.text}
           </span>
           {todo.reminder && (
             <div className="flex items-center gap-3 mt-1 pointer-events-auto">
-              <span className={`text-xs flex items-center gap-1 ${isOverdue ? 'text-red-500' : 'text-teal'}`}>
+              <span className={`text-xs flex items-center gap-1 ${isOverdue ? 'text-rose-500' : 'text-teal'}`}>
                 <Bell className="w-3 h-3" />
                 {formatReminder(todo.reminder)}
               </span>
@@ -163,13 +180,13 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
           {new Date(todo.createdAt).toLocaleDateString()}
         </span>
 
-        {/* Desktop Delete Button */}
+        {/* Desktop Delete Button (Hover Only) */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             deleteTask(todo.id);
           }}
-          className="opacity-0 group-hover:opacity-100 p-2 text-sage hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all hidden sm:block pointer-events-auto"
+          className="opacity-0 group-hover:opacity-100 p-2 text-sage hover:text-midnight hover:bg-white/50 rounded-lg transition-all hidden sm:block pointer-events-auto"
         >
           <Trash2 className="w-5 h-5" />
         </button>
@@ -310,7 +327,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
                   handleDeleteCategory(cat.id);
                 }}
                 // Positioned inside the pill (right-1.5) to avoid clipping by overflow:hidden
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-red-600 hover:scale-110"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-midnight text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:scale-110"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </div>
