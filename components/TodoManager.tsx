@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Category, TodoItem } from '../types';
-import { Plus, Trash2, CheckCircle, Circle, Check, Clock, Bell, CalendarPlus } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Check, Clock, Bell, CalendarPlus, Pencil } from 'lucide-react';
 
 interface TodoManagerProps {
   categories: Category[];
@@ -32,15 +32,28 @@ interface SwipeableTodoItemProps {
   todo: TodoItem;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
+  editTask: (id: string, newText: string) => void;
 }
 
-const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask, deleteTask }) => {
+const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask, deleteTask, editTask }) => {
   const [offsetX, setOffsetX] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState(todo.text);
+  
   const startX = useRef<number>(0);
   const itemRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
 
   const onTouchStart = (e: React.TouchEvent) => {
+    if (isEditing) return; // Disable swipe when editing
     startX.current = e.targetTouches[0].clientX;
     setIsSwiping(true);
     // Disable transition during drag for immediate feedback
@@ -48,7 +61,7 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    if (!isSwiping) return;
+    if (!isSwiping || isEditing) return;
     const currentX = e.targetTouches[0].clientX;
     const diff = currentX - startX.current;
 
@@ -61,6 +74,7 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
   };
 
   const onTouchEnd = () => {
+    if (isEditing) return;
     setIsSwiping(false);
     if (itemRef.current) itemRef.current.style.transition = 'transform 0.3s ease-out';
 
@@ -75,6 +89,23 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
       setOffsetX(0);
     } else {
       setOffsetX(0);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (editedText.trim()) {
+      editTask(todo.id, editedText);
+    } else {
+      setEditedText(todo.text); // Revert if empty
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSaveEdit();
+    if (e.key === 'Escape') {
+      setEditedText(todo.text);
+      setIsEditing(false);
     }
   };
 
@@ -101,10 +132,6 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
   const isSwipingRight = offsetX > 0;
   const isSwipingLeft = offsetX < 0;
   
-  // Background Color Logic:
-  // - Default (offsetX === 0): Transparent (to prevent color bleeding through glass)
-  // - Right Swipe: Teal
-  // - Left Swipe: Midnight (Synced with Theme)
   const swipeBgClass = isSwipingRight 
     ? 'bg-teal justify-start' 
     : isSwipingLeft 
@@ -153,13 +180,32 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
           )}
         </button>
         
-        <div className="flex-1 flex flex-col pointer-events-none min-w-0">
-          <span className={`text-base font-medium truncate transition-all ${
-            todo.completed ? 'line-through text-sage' : 'text-midnight dark:text-gray-200'
-          }`}>
-            {todo.text}
-          </span>
-          {todo.reminder && (
+        <div 
+          className="flex-1 flex flex-col min-w-0"
+          onDoubleClick={() => !todo.completed && setIsEditing(true)}
+          title="Double click to edit"
+        >
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={editedText}
+              onChange={(e) => setEditedText(e.target.value)}
+              onBlur={handleSaveEdit}
+              onKeyDown={handleKeyDown}
+              className="bg-transparent border-b border-teal outline-none text-base font-medium text-midnight dark:text-mint w-full p-0 m-0 pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()} // Prevent swipe trigger on input
+            />
+          ) : (
+            <span className={`text-base font-medium truncate transition-all cursor-text ${
+              todo.completed ? 'line-through text-sage' : 'text-midnight dark:text-gray-200'
+            }`}>
+              {todo.text}
+            </span>
+          )}
+          
+          {!isEditing && todo.reminder && (
             <div className="flex items-center gap-3 mt-1 pointer-events-auto">
               <span className={`text-xs flex items-center gap-1 ${isOverdue ? 'text-rose-500' : 'text-teal'}`}>
                 <Bell className="w-3 h-3" />
@@ -180,16 +226,31 @@ const SwipeableTodoItem: React.FC<SwipeableTodoItemProps> = ({ todo, toggleTask,
           {new Date(todo.createdAt).toLocaleDateString()}
         </span>
 
-        {/* Desktop Delete Button (Hover Only) */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            deleteTask(todo.id);
-          }}
-          className="opacity-0 group-hover:opacity-100 p-2 text-sage hover:text-midnight hover:bg-white/50 rounded-lg transition-all hidden sm:block pointer-events-auto"
-        >
-          <Trash2 className="w-5 h-5" />
-        </button>
+        {/* Desktop Actions (Edit & Delete) */}
+        {!isEditing && (
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex pointer-events-auto">
+             <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+              }}
+              className="p-2 text-sage hover:text-teal hover:bg-white/50 rounded-lg transition-all"
+              title="Edit Task"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteTask(todo.id);
+              }}
+              className="p-2 text-sage hover:text-midnight hover:bg-white/50 rounded-lg transition-all"
+              title="Delete Task"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -272,6 +333,21 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
           ...cat,
           todos: cat.todos.map((t) =>
             t.id === todoId ? { ...t, completed: !t.completed } : t
+          ),
+        };
+      }
+      return cat;
+    });
+    setCategories(updatedCategories);
+  };
+
+  const handleEditTask = (todoId: string, newText: string) => {
+    const updatedCategories = categories.map((cat) => {
+      if (cat.id === activeCategoryId) {
+        return {
+          ...cat,
+          todos: cat.todos.map((t) =>
+            t.id === todoId ? { ...t, text: newText } : t
           ),
         };
       }
@@ -448,6 +524,7 @@ const TodoManager: React.FC<TodoManagerProps> = ({ categories, setCategories, on
                     todo={todo}
                     toggleTask={toggleTask}
                     deleteTask={deleteTask}
+                    editTask={handleEditTask}
                   />
                 ))
               )}
